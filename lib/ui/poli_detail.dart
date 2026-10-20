@@ -33,6 +33,7 @@ class PoliDetail extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                // Tombol Ubah (kiri, hijau)
                 SizedBox(
                   width: 65,
                   height: 35,
@@ -56,6 +57,7 @@ class PoliDetail extends StatelessWidget {
 
                 const SizedBox(width: 50),
 
+                // Tombol Hapus (tengah, merah)
                 SizedBox(
                   width: 65,
                   height: 35,
@@ -70,6 +72,30 @@ class PoliDetail extends StatelessWidget {
                     ),
                     child: const Text(
                       "Hapus",
+                      style: TextStyle(
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 50),
+
+                // Tombol Cetak (kanan, kuning)
+                SizedBox(
+                  width: 65,
+                  height: 35,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Aksi Cetak
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.yellow,
+                      foregroundColor: Colors.black,
+                      padding: EdgeInsets.zero,
+                    ),
+                    child: const Text(
+                      "Cetak",
                       style: TextStyle(
                         fontSize: 12,
                       ),
