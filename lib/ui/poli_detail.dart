@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../model/poli.dart';
+import 'poli_update_form.dart';
 
 class PoliDetail extends StatelessWidget {
   final Poli poli;
@@ -8,6 +9,32 @@ class PoliDetail extends StatelessWidget {
     super.key,
     required this.poli,
   });
+
+  void _konfirmasiHapus(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: const Text("Yakin ingin menghapus data ini?"),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context); // tutup dialog
+              Navigator.pop(context); // kembali ke list
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text("YA"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Tidak"),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +66,12 @@ class PoliDetail extends StatelessWidget {
                   height: 35,
                   child: ElevatedButton(
                     onPressed: () {
-                      // Aksi Ubah
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PoliUpdateForm(poli: poli),
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
@@ -62,9 +94,7 @@ class PoliDetail extends StatelessWidget {
                   width: 65,
                   height: 35,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // Aksi Hapus
-                    },
+                    onPressed: () => _konfirmasiHapus(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                       foregroundColor: Colors.white,
