@@ -1,142 +1,112 @@
 import 'package:flutter/material.dart';
-import '../model/poli.dart';
+import '../service/poli_service.dart';
+import 'poli_page.dart';
 import 'poli_update_form.dart';
+import '../model/poli.dart';
 
-class PoliDetail extends StatelessWidget {
+class PoliDetail extends StatefulWidget {
   final Poli poli;
 
-  const PoliDetail({
-    super.key,
-    required this.poli,
-  });
+  const PoliDetail({super.key, required this.poli});
 
-  void _konfirmasiHapus(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        content: const Text("Yakin ingin menghapus data ini?"),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context); // tutup dialog
-              Navigator.pop(context); // kembali ke list
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text("YA"),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Tidak"),
-          ),
-        ],
-      ),
-    );
+  @override
+  _PoliDetailState createState() => _PoliDetailState();
+}
+
+class _PoliDetailState extends State<PoliDetail> {
+  Future<Poli> getData() async {
+    return await PoliService().getById(widget.poli.id.toString());
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Detail Poli"),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            const SizedBox(height: 15),
-
-            Text(
-              "Nama Poli : ${poli.namaPoli}",
-              style: const TextStyle(
-                fontSize: 16,
-              ),
-            ),
-
-            const SizedBox(height: 15),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+      appBar: AppBar(title: const Text("Detail Poli")),
+      body: FutureBuilder<Poli>(
+        future: getData(),
+        builder: (context, AsyncSnapshot<Poli> snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text(snapshot.error.toString()));
+          }
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData) {
+            return const Center(child: Text('Data Tidak Ditemukan'));
+          }
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
               children: [
-                // Tombol Ubah (kiri, hijau)
-                SizedBox(
-                  width: 65,
-                  height: 35,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PoliUpdateForm(poli: poli),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.zero,
-                    ),
-                    child: const Text(
-                      "Ubah",
-                      style: TextStyle(
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
+                const SizedBox(height: 20),
+                Text(
+                  "Nama Poli : ${snapshot.data!.namaPoli}",
+                  style: const TextStyle(fontSize: 20),
                 ),
-
-                const SizedBox(width: 50),
-
-                // Tombol Hapus (tengah, merah)
-                SizedBox(
-                  width: 65,
-                  height: 35,
-                  child: ElevatedButton(
-                    onPressed: () => _konfirmasiHapus(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.zero,
-                    ),
-                    child: const Text(
-                      "Hapus",
-                      style: TextStyle(
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(width: 50),
-
-                // Tombol Cetak (kanan, kuning)
-                SizedBox(
-                  width: 65,
-                  height: 35,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Aksi Cetak
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.yellow,
-                      foregroundColor: Colors.black,
-                      padding: EdgeInsets.zero,
-                    ),
-                    child: const Text(
-                      "Cetak",
-                      style: TextStyle(
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _tombolUbah(snapshot.data!),
+                    _tombolHapus(),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
+          );
+        },
       ),
+    );
+  }
+
+  Widget _tombolUbah(Poli poli) {
+    return ElevatedButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => PoliUpdateForm(poli: poli)),
+        );
+      },
+      style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+      child: const Text("Ubah"),
+    );
+  }
+
+  Widget _tombolHapus() {
+    return ElevatedButton(
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            content: const Text("Yakin ingin menghapus data ini?"),
+            actions: [
+              ElevatedButton(
+                onPressed: () async {
+                  await PoliService().hapus(widget.poli);
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const PoliPage()),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                child: const Text("YA"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                child: const Text("Tidak"),
+              ),
+            ],
+          ),
+        );
+      },
+      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+      child: const Text("Hapus"),
     );
   }
 }

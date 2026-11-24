@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'beranda.dart';
+import '../service/login_service.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -20,28 +21,49 @@ class _LoginState extends State<Login> {
     super.dispose();
   }
 
-  void _prosesLogin() {
-    if (!_formKey.currentState!.validate()) return;
+  Widget _tombolLogin() {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width,
+      child: ElevatedButton(
+        child: const Text("Login"),
+        onPressed: () async {
+          if (!_formKey.currentState!.validate()) return;
 
-    if (_usernameCtrl.text == "admin" && _passwordCtrl.text == "admin") {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const Beranda()),
-      );
-    } else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          content: const Text("Username atau password salah"),
-          actions: [
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("OK"),
-            ),
-          ],
-        ),
-      );
-    }
+          String username = _usernameCtrl.text;
+          String password = _passwordCtrl.text;
+
+          await LoginService().login(username, password).then((value) {
+            if (!mounted) return;
+
+            if (value == true) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const Beranda()),
+              );
+            } else {
+              AlertDialog alertDialog = AlertDialog(
+                content: const Text("Username atau Password Tidak Valid"),
+                actions: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                    ),
+                    child: const Text("OK"),
+                  ),
+                ],
+              );
+              showDialog(
+                context: context,
+                builder: (context) => alertDialog,
+              );
+            }
+          });
+        },
+      ),
+    );
   }
 
   @override
@@ -78,13 +100,7 @@ class _LoginState extends State<Login> {
                       (v == null || v.isEmpty) ? "Password wajib diisi" : null,
                 ),
                 const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _prosesLogin,
-                    child: const Text("Login"),
-                  ),
-                ),
+                _tombolLogin(),
               ],
             ),
           ),
